@@ -1,6 +1,15 @@
-# Picture_bed
-利用webdav搭建图床
+1. `git clone https://github.com/wkmyws/Picture_bed.git`
 
-先在这里立个FLAG，
+2. `npm install`
 
-放假后开始编写~
+3. replace <a href='./config.js'>config.address</a>
+
+   more configs you can set are in <a href='./config.js'>this file</a>
+
+4. `node app.js` 或者 `pm2 start pic_bed.sh`
+
+5. visit `localhost:port` or `config.address`
+
+   default port is 24680
+
+:smile:
