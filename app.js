@@ -16,14 +16,8 @@ router.post('/api/upload', async (ctx, next) => {
         fs.unlinkSync(ctx.request.files.file.path)
         ctx.body = "口令错误"
     } else {
-        ctx.body = config.address + "/" + ctx.request.files.file.path.split("/").pop()
+        ctx.body = config.address + "/img/" + ctx.request.files.file.path.split("/").pop()
     }
-})
-//增加图片 前端
-router.get('/api/upload', async (ctx, next) => {
-    let data = fs.readFileSync('./upload.html')
-    ctx.type = "text/html"
-    ctx.body = data
 })
 
 //删除图片 后端
@@ -41,13 +35,6 @@ router.post('/api/del', (ctx, next) => {
     }
 })
 
-//删除图片 前端
-router.get('/api/del', (ctx, next) => {
-    let data = fs.readFileSync('./del.html')
-    ctx.type = "text/html"
-    ctx.body = data
-})
-
 
 app.use(cors({
     //跨域配置
@@ -58,7 +45,7 @@ app.use(cors({
         try {
             await next()
             if (!ctx.body) {
-                let data = fs.readFileSync('./index.html')
+                let data = fs.readFileSync('./public/html/index.html')
                 ctx.type = "text/html"
                 ctx.body = data
             }
@@ -73,6 +60,6 @@ app.use(cors({
             keepExtensions: true,
         }
     }))
-    .use(require('koa-static')(path.join(__dirname, config.imgPath)))
+    .use(require('koa-static')(path.join('./public')))
     .use(router.routes())
     .listen(config.port)

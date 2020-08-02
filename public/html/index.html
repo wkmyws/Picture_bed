@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>图床</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+</head>
+
+<body>
+    <br><br>
+    <nav class="level">
+        <div class="level-item has-text-centered">
+            <div class="container is-fluid">
+                <div class="notification">
+                    在这里选择<code>上传</code>或者<code>删除</code>图片
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <nav class="level">
+        <div class="level-item has-text-centered">
+            <div class="container is-fluid">
+                <div class="tabs is-centered">
+                    <ul>
+                        <li id="_li_upload" class="is-active "><a onclick="shift('upload')">上传图片</a></li>
+                        <li id="_li_del" class><a onclick="shift('del')">删除图片</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <nav id="_nav_upload" class="level">
+        <div class="level-item has-text-centered">
+            <div class="container desktop">
+
+                <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title is-centered"><code>上传图片</code></p>
+                    </header>
+                    <div class="card-content">
+                        <input class="input is-info" type="file" id="_f"></input>
+                        <br><br>
+                        <input id="_uploadPwd" class="input is-warning" type="text" placeholder="口令(默认为空)"></input>
+                    </div>
+                    <footer class="card-footer">
+                        <div class="container is-fluid">
+                            <button id="_upload_btn" class="button is-link is-fullwidth"
+                                onclick="submit('upload')">上传</button>
+                        </div>
+
+                    </footer>
+                </div>
+
+                <br>
+
+            </div>
+        </div>
+    </nav>
+
+
+    <nav id="_nav_del" class="level" style="display: none;">
+        <div class="level-item has-text-centered">
+            <div class="container desktop">
+
+                <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title is-centered"><code>删除图片</code></p>
+                    </header>
+                    <div class="card-content">
+                        <input id="_del_f" class="input is-info" type="text" placeholder="输入图片路径"></input>
+                        <br><br>
+                        <input id="_del_pwd" class="input is-warning" type="text" placeholder="口令(默认为空)"></input>
+                    </div>
+                    <footer class="card-footer">
+                        <div class="container is-fluid">
+                            <button id="_del_btn" class="button is-danger is-fullwidth"
+                                onclick="submit('del')">删除</button>
+                        </div>
+
+                    </footer>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <div id="_board" class="card">
+        <div class="card-content">
+            <div class="content">
+                <p id="_tips" class="notification has-text-centered"></p>
+                <time id="_res_time" datetime=""></time>
+            </div>
+        </div>
+        <div class="card-image">
+            <img id="_res_img" src="" alt="" />
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        var axios_config = {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        }
+        function _(id) {
+            id = (typeof (id) == typeof ("string") ? document.getElementById(id) : id)
+            var classList = id.className.split(" ")
+            return {
+                addClass: (c) => {
+                    return id.className = classList.filter((v) => v != c).join(" ") + " " + c
+                },
+                delClass: (c) => {
+                    return id.className = classList.filter((v) => v != c).join(" ")
+                },
+                setStyle: (s) => {
+                    return id.style = s
+                }
+            }
+        }
+        function shift(m) {
+            _res_img.src = _tips.innerHTML = _res_time.datetime = ""
+            if (m == "upload") {
+                _("_li_upload").addClass("is-active")
+                _("_li_del").delClass("is-active")
+                _("_nav_upload").setStyle("")
+                _("_nav_del").setStyle("display: none;")
+            } else if (m == "del") {
+                _("_li_upload").delClass("is-active")
+                _("_li_del").addClass("is-active")
+                _("_nav_upload").setStyle("display: none;")
+                _("_nav_del").setStyle("")
+            }
+        }
+        function submit(m) {
+            _res_img.src = _tips.innerHTML = _res_time.datetime = ""
+            if (m == "upload") {
+                if (_f.files.length == 0) {
+                    _tips.innerHTML = "请选择图片"
+                    return
+                }
+                var param = new FormData()
+                param.append('file', _f.files[0])
+                param.append('pwd', _uploadPwd.value || null)
+                _("_upload_btn").addClass("is-loading")
+                axios.post('/api/upload', param, axios_config)
+                    .then((res) => {
+                        _("_upload_btn").delClass("is-loading")
+                        _res_img.src = res.data
+                        _tips.innerHTML = res.data
+                        _res_time.datetime = new Date()
+                    }).catch((err) => {
+                        _tips.innerHTML = ("上传出错：" + err.toString())
+                        _("_upload_btn").delClass("is-loading")
+                    })
+            } else if (m == "del") {
+                if (!_del_f.value) {
+                    _tips.innerHTML = "请输入图片路径"
+                    return
+                }
+                var param = new FormData()
+                param.append('name', _del_f.value)
+                param.append('pwd', _del_pwd.value || null)
+                _("_del_btn").addClass("is-loading")
+                axios.post('/api/del', param, axios_config)
+                    .then((res) => {
+                        _tips.innerHTML = res.data
+                        _("_del_btn").delClass("is-loading")
+
+                    })
+                    .catch((err) => {
+                        _tips.innerHTML = ("上传错误：" + err.toString())
+                        _("_del_btn").delClass("is-loading")
+                    })
+            }
+        }
+
+    </script>
+    <script>
+        //upload
+    </script>
+    <script>
+        //del
+    </script>
+</body>
+
+</html>

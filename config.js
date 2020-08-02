@@ -6,7 +6,7 @@ module.exports={
      *基于ip+端口的:  ip:port/图片地址
     */
     address:"http://39.106.182.167:24680", 
-    imgPath:"./img", //图片上传地址
+    imgPath:"./public"+"/img", //图片上传地址
     uploadPwd: null, //上传图片需要的密码，设为null则不需要密码
     delPwd: "del", //删除图片需要的密码，设为 null 则不需要密码
 }
